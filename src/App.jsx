@@ -38,7 +38,72 @@ const questions = [
     answer: 1,
     explanation: "FV = 1000 × (1 + 0.03)^8 ≈ ₹1,268.25"
   },
-  // Add more CA-level questions (total 15)
+  {
+    question: "A machine costing ₹50,000 depreciates at 10% per annum. Value after 3 years?",
+    options: ["₹36,450", "₹36,450.45", "₹36,450.49", "₹36,450.50"],
+    answer: 2,
+    explanation: "Value = ₹50,000 × (0.9)^3 = ₹36,450.49"
+  },
+  {
+    question: "Find effective rate corresponding to 6% nominal rate compounded semi-annually.",
+    options: ["6.06%", "6.08%", "6.09%", "6.10%"],
+    answer: 2,
+    explanation: "EAR = (1 + 0.06/2)^2 - 1 = 6.09%"
+  },
+  {
+    question: "₹5,000 deposited yearly for 5 years @10% compounded annually becomes?",
+    options: ["₹30,525", "₹30,530", "₹30,600", "₹30,625"],
+    answer: 0,
+    explanation: "FV = 5000 × [(1+0.10)^5 – 1]/0.10 = ₹30,525"
+  },
+  {
+    question: "If CI for 2 years is ₹3,816 and SI is ₹3,600, find principal.",
+    options: ["₹15,000", "₹18,000", "₹20,000", "₹30,000"],
+    answer: 2,
+    explanation: "SI = P×r×t/100 = ₹3,600 ⇒ P = ₹20,000"
+  },
+  {
+    question: "What is the SI on ₹1,000 for 3 years at 5% p.a.?",
+    options: ["₹100", "₹150", "₹125", "₹120"],
+    answer: 1,
+    explanation: "SI = P×r×t/100 = 1000×5×3/100 = ₹150"
+  },
+  {
+    question: "At what rate ₹10,000 becomes ₹14,641 in 3 years compounded annually?",
+    options: ["12%", "13%", "14%", "15%"],
+    answer: 3,
+    explanation: "A = P(1+r)^n ⇒ 14641 = 10000(1+r)^3 ⇒ r = 15%"
+  },
+  {
+    question: "Discount factor for ₹1 at 8% in 4 years is?",
+    options: ["0.7350", "0.73503", "0.7351", "0.735"],
+    answer: 1,
+    explanation: "PV = 1 / (1+0.08)^4 ≈ 0.73503"
+  },
+  {
+    question: "Which method considers time value of money in capital budgeting?",
+    options: ["Payback", "ARR", "NPV", "Accounting Rate"],
+    answer: 2,
+    explanation: "NPV considers time value of money."
+  },
+  {
+    question: "A sum becomes ₹6,600 in 3 years and ₹6,000 in 2 years CI. Rate?",
+    options: ["10%", "12%", "15%", "8%"],
+    answer: 0,
+    explanation: "6600/6000 = 1.1 ⇒ r = 10%"
+  },
+  {
+    question: "Time taken to double money at 10% CI annually?",
+    options: ["7.2 years", "7 years", "7.3 years", "7.5 years"],
+    answer: 0,
+    explanation: "Using Rule of 72 ⇒ 72/10 = 7.2 years"
+  },
+  {
+    question: "Present value of ₹1,000 due in 10 years at 6%?",
+    options: ["₹558.39", "₹558", "₹558.4", "₹559"],
+    answer: 0,
+    explanation: "PV = 1000 / (1.06)^10 = ₹558.39"
+  }
 ];
 
 function QuizPDF({ questions, responses }) {
