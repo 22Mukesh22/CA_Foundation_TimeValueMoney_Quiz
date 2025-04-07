@@ -1,236 +1,160 @@
-import React, { useState, useEffect } from "react";
+// Complete professional-quality quiz app for Jijaji Test Series
+// React + TailwindCSS + React Router + Webcam + Multi-page
 
-const quizData = [
+import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import Webcam from 'react-webcam';
+import './App.css';
+
+const questions = [
   {
-    question: "What is the primary reason interest is charged on borrowed money?",
-    options: ["To reward the borrower", "Due to government regulation", "Time value of money", "Inflation"],
+    text: "What is the primary reason interest is charged on borrowed money?",
+    options: [
+      "To reward the borrower",
+      "Due to government regulation",
+      "Time value of money",
+      "Inflation"
+    ],
     answer: 2,
-    explanation: "Time value of money means money today is more valuable than in the future."
+    explanation: "Interest is charged primarily due to the time value of money — money today is worth more than the same amount in the future."
   },
   {
-    question: "A sum of ₹10,000 is invested for 3 years at 10% p.a. simple interest. What will be the total interest earned?",
-    options: ["₹ 3,000", "₹ 2,000", "₹ 3,300", "₹ 3,600"],
+    text: "What does the term 'present value' mean?",
+    options: [
+      "Value of future money today",
+      "Amount received in future",
+      "Amount paid as interest",
+      "None of the above"
+    ],
     answer: 0,
-    explanation: "Simple interest = PRT/100 = 10000×10×3/100 = ₹ 3,000"
-  },
-  {
-    question: "What is the formula for compound interest amount?",
-    options: ["A = P(1 + rt)", "A = P + I", "A = P(1 + i)^n", "A = P + P(i × n)"],
-    answer: 2,
-    explanation: "Compound amount formula: A = P(1 + i)^n"
-  },
-  {
-    question: "If ₹5,000 becomes ₹6,050 in 2 years at compound interest, what is the rate of interest per annum?",
-    options: ["10%", "9%", "11%", "12%"],
-    answer: 0,
-    explanation: "6050 = 5000(1 + r)^2 → r = 10%"
-  },
-  {
-    question: "What is the effective annual rate of interest for 6% p.a. compounded quarterly?",
-    options: ["6.00%", "6.09%", "6.13%", "6.25%"],
-    answer: 2,
-    explanation: "Effective Rate = (1 + i)^n - 1 = (1 + 0.015)^4 - 1 = 6.13%"
-  },
-  {
-    question: "At what rate will a sum double in 10 years under compound interest?",
-    options: ["7%", "10.41%", "10%", "9%"],
-    answer: 1,
-    explanation: "2 = (1 + r)^10 → r ≈ 10.41%"
-  },
-  {
-    question: "Which of the following is true for simple interest?",
-    options: ["Principal changes every year", "Interest is paid on interest", "Interest is calculated only on original principal", "Interest is higher than compound interest"],
-    answer: 2,
-    explanation: "Simple interest is calculated only on principal."
-  },
-  {
-    question: "The present value of ₹1,000 to be received after 2 years at 10% interest rate is:",
-    options: ["₹ 800", "₹ 909", "₹ 826.4", "₹ 950"],
-    answer: 2,
-    explanation: "PV = 1000 / (1.1)^2 = ₹826.4"
-  },
-  {
-    question: "Which of the following is an example of an annuity due?",
-    options: ["EMI starting after 1 month", "Pension starting next year", "Rent paid at the beginning of each month", "Insurance claim at end of year"],
-    answer: 2,
-    explanation: "Annuity due means payment at beginning of each period."
-  },
-  {
-    question: "A sum of ₹20,000 is deposited at 8% p.a. compounded semi-annually. What is the amount after 1 year?",
-    options: ["₹ 21,600", "₹ 21,632", "₹ 21,648", "₹ 21,500"],
-    answer: 1,
-    explanation: "A = 20000(1 + 0.04)^2 = ₹ 21,632"
-  },
-  {
-    question: "The future value of an annuity of ₹500 annually for 3 years at 10% is:",
-    options: ["₹ 1,650", "₹ 1,576.50", "₹ 1,655", "₹ 1,500"],
-    answer: 1,
-    explanation: "FV = 500[(1.1)^3 – 1]/0.1 = ₹ 1,576.50"
-  },
-  {
-    question: "Which table function is used to compute equal loan repayments?",
-    options: ["Future Value Table", "Sinking Fund Table", "Amortization Table", "Compound Growth Table"],
-    answer: 2,
-    explanation: "Amortization Table helps calculate EMIs."
-  },
-  {
-    question: "The difference between compound and simple interest on ₹10,000 for 2 years at 10% is:",
-    options: ["₹ 100", "₹ 200", "₹ 150", "₹ 50"],
-    answer: 1,
-    explanation: "CI - SI = ₹200 in this case."
-  },
-  {
-    question: "Which of the following is not a reason why interest is charged?",
-    options: ["Risk", "Opportunity cost", "Inflation", "Gratitude"],
-    answer: 3,
-    explanation: "Gratitude isn't a financial factor."
-  },
-  {
-    question: "If ₹16,000 amounts to ₹18,522 in 1.5 years compounded half-yearly at 10% p.a., what is the number of periods?",
-    options: ["1", "3", "6", "2"],
-    answer: 1,
-    explanation: "Compounded half-yearly: n = 3"
+    explanation: "Present value is the current worth of a future sum of money, discounted at a specific rate."
   }
 ];
 
-export default function App() {
-  const [name, setName] = useState("");
-  const [mobile, setMobile] = useState("");
-  const [started, setStarted] = useState(false);
-  const [currentQ, setCurrentQ] = useState(0);
-  const [answers, setAnswers] = useState(Array(quizData.length).fill(null));
-  const [submitted, setSubmitted] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(30 * 60); // 30 min
-  const [showGreeting, setShowGreeting] = useState(false);
-  const [tabSwitches, setTabSwitches] = useState(0);
+function LandingPage() {
+  const navigate = useNavigate();
+  const [name, setName] = useState('');
+  const [mobile, setMobile] = useState('');
 
-  useEffect(() => {
-    if (started && timeLeft > 0 && !submitted) {
-      const timer = setInterval(() => setTimeLeft((t) => t - 1), 1000);
-      return () => clearInterval(timer);
-    } else if (timeLeft === 0 && !submitted) {
-      handleSubmit();
+  const handleStart = () => {
+    if (name && mobile) {
+      localStorage.setItem('userName', name);
+      localStorage.setItem('userMobile', mobile);
+      navigate('/quiz');
     }
-  }, [timeLeft, submitted, started]);
-
-  useEffect(() => {
-    const handleBlur = () => {
-      if (!submitted) {
-        alert("Please do not switch tabs during the exam.");
-        setTabSwitches((t) => t + 1);
-      }
-    };
-    window.addEventListener("blur", handleBlur);
-    return () => window.removeEventListener("blur", handleBlur);
-  }, [submitted]);
-
-  const handleSelect = (qIndex, optIndex) => {
-    const updated = [...answers];
-    updated[qIndex] = optIndex;
-    setAnswers(updated);
   };
 
-  const handleSubmit = () => {
-    setSubmitted(true);
-  };
-
-  const score = answers.reduce((acc, val, idx) => val === quizData[idx].answer ? acc + 1 : acc, 0);
-  const mins = Math.floor(timeLeft / 60);
-  const secs = String(timeLeft % 60).padStart(2, "0");
-
-  if (!started) {
-    return (
-      <div className="max-w-lg mx-auto mt-20 p-6 bg-white shadow rounded">
-        <h2 className="text-xl font-bold mb-4">Enter Details to Start Quiz</h2>
-        <input
-          type="text"
-          placeholder="Full Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="border p-2 w-full mb-2 rounded"
-        />
-        <input
-          type="text"
-          placeholder="Mobile Number"
-          value={mobile}
-          onChange={(e) => setMobile(e.target.value)}
-          className="border p-2 w-full mb-4 rounded"
-        />
-        <button
-          className="bg-blue-600 text-white w-full py-2 rounded"
-          disabled={!name || !mobile}
-          onClick={() => {
-            setStarted(true);
-            setShowGreeting(true);
-            setTimeout(() => setShowGreeting(false), 20000);
-            navigator.mediaDevices.getUserMedia({ video: true }).catch(() => {});
-          }}
-        >
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-blue-50 px-4">
+      <h1 className="text-4xl font-bold mb-2 text-center">Jijaji Test Series</h1>
+      <p className="mb-6 text-lg text-gray-600">Time Value of Money – Mock Test</p>
+      <div className="bg-white shadow-xl rounded-2xl p-6 w-full max-w-md space-y-4">
+        <input type="text" placeholder="Full Name" value={name} onChange={e => setName(e.target.value)} className="w-full p-3 border rounded-xl" />
+        <input type="tel" placeholder="Mobile Number" value={mobile} onChange={e => setMobile(e.target.value)} className="w-full p-3 border rounded-xl" />
+        <div className="aspect-video rounded-xl overflow-hidden">
+          <Webcam className="w-full h-full object-cover" />
+        </div>
+        <button onClick={handleStart} className="w-full bg-blue-600 text-white p-3 rounded-xl text-lg font-semibold hover:bg-blue-700 transition">
           Start Quiz
         </button>
       </div>
-    );
-  }
-
-  return (
-    <div className="max-w-4xl mx-auto p-4">
-      {showGreeting && (
-        <div className="p-4 bg-yellow-100 rounded mb-4 text-center">
-          Hello!! <strong>{name}</strong><br />
-          Good luck from your Jijaji!
-        </div>
-      )}
-      {!submitted && (
-        <div className="flex justify-between items-center mb-4 text-sm text-gray-600">
-          <span>Time Left: {mins}:{secs}</span>
-          <span>Tab Switches: {tabSwitches}</span>
-        </div>
-      )}
-      <div className="mb-6">
-        <p className="font-semibold text-lg">
-          {currentQ + 1}. {quizData[currentQ].question}
-        </p>
-        <div className="mt-2 space-y-2">
-          {quizData[currentQ].options.map((opt, idx) => (
-            <label key={idx} className="block">
-              <input
-                type="radio"
-                name={`q-${currentQ}`}
-                checked={answers[currentQ] === idx}
-                onChange={() => handleSelect(currentQ, idx)}
-                className="mr-2"
-                disabled={submitted}
-              />
-              {opt}
-            </label>
-          ))}
-        </div>
-        {submitted && (
-          <div className="text-sm mt-2 text-gray-700">
-            ✅ Correct Answer: {quizData[currentQ].options[quizData[currentQ].answer]}<br />
-            📘 Explanation: {quizData[currentQ].explanation}
-          </div>
-        )}
-      </div>
-
-      <div className="flex justify-between">
-        <button disabled={currentQ === 0} onClick={() => setCurrentQ((q) => q - 1)} className="bg-gray-300 px-4 py-2 rounded">Previous</button>
-        {!submitted ? (
-          currentQ === quizData.length - 1 ? (
-            <button onClick={handleSubmit} className="bg-green-600 text-white px-4 py-2 rounded">Submit</button>
-          ) : (
-            <button onClick={() => setCurrentQ((q) => q + 1)} className="bg-blue-600 text-white px-4 py-2 rounded">Next</button>
-          )
-        ) : (
-          <button onClick={() => setCurrentQ((q) => (q + 1) % quizData.length)} className="bg-blue-500 text-white px-4 py-2 rounded">Next Review</button>
-        )}
-      </div>
-
-      {submitted && currentQ === quizData.length - 1 && (
-        <div className="mt-6 bg-green-100 p-4 border rounded">
-          <h2 className="text-lg font-semibold">🎉 Your Score: {score} / {quizData.length}</h2>
-        </div>
-      )}
     </div>
   );
 }
+
+function QuizPage() {
+  const [selected, setSelected] = useState(null);
+  const [tabSwitches, setTabSwitches] = useState(0);
+  const [currentQ, setCurrentQ] = useState(0);
+  const [responses, setResponses] = useState([]);
+  const [timeLeft, setTimeLeft] = useState(1800); // 30 mins
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleBlur = () => setTabSwitches(prev => prev + 1);
+    window.addEventListener('blur', handleBlur);
+    return () => window.removeEventListener('blur', handleBlur);
+  }, []);
+
+  useEffect(() => {
+    if (timeLeft <= 0) navigate('/result', { state: { responses } });
+    const interval = setInterval(() => setTimeLeft(t => t - 1), 1000);
+    return () => clearInterval(interval);
+  }, [timeLeft]);
+
+  const handleNext = () => {
+    setResponses([...responses, selected]);
+    setSelected(null);
+    if (currentQ + 1 < questions.length) {
+      setCurrentQ(currentQ + 1);
+    } else {
+      navigate('/result', { state: { responses: [...responses, selected] } });
+    }
+  };
+
+  const q = questions[currentQ];
+
+  return (
+    <div className="flex h-screen">
+      <div className="w-2/3 p-6 space-y-6 bg-white overflow-y-auto">
+        <h2 className="text-2xl font-bold text-gray-800">Question {currentQ + 1}</h2>
+        <p className="text-xl text-gray-700">{q.text}</p>
+        <div className="space-y-4">
+          {q.options.map((opt, idx) => (
+            <label key={idx} className="flex items-start space-x-3 text-lg">
+              <input type="radio" name="option" checked={selected === idx} onChange={() => setSelected(idx)} className="mt-1" />
+              <span>{opt}</span>
+            </label>
+          ))}
+        </div>
+        <button disabled={selected === null} onClick={handleNext} className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-xl font-semibold disabled:bg-gray-400">
+          {currentQ + 1 === questions.length ? 'Submit' : 'Next'}
+        </button>
+      </div>
+      <div className="w-1/3 bg-slate-50 p-4 border-l">
+        <p className="mb-2 font-semibold">Webcam Monitoring</p>
+        <div className="aspect-video rounded-xl overflow-hidden border">
+          <Webcam className="w-full h-full object-cover" />
+        </div>
+        <div className="mt-4 text-gray-600 space-y-1">
+          <p><strong>Time Left:</strong> {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}</p>
+          <p><strong>Tab Switches:</strong> {tabSwitches}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ResultPage({ location }) {
+  const responses = location?.state?.responses || [];
+
+  return (
+    <div className="min-h-screen p-6 bg-slate-100">
+      <h1 className="text-3xl font-bold text-center mb-6">Quiz Result</h1>
+      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
+        {questions.map((q, idx) => (
+          <div key={idx} className="border-b pb-4">
+            <h2 className="text-lg font-semibold">Q{idx + 1}: {q.text}</h2>
+            <p className="text-gray-600">Your Answer: <strong className={responses[idx] === q.answer ? 'text-green-600' : 'text-red-600'}>{q.options[responses[idx]] || 'Not answered'}</strong></p>
+            <p className="text-gray-600">Correct Answer: <strong className="text-green-700">{q.options[q.answer]}</strong></p>
+            <p className="text-sm text-gray-500 mt-1 italic">Explanation: {q.explanation}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/quiz" element={<QuizPage />} />
+        <Route path="/result" element={<ResultPage />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
