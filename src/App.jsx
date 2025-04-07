@@ -1,4 +1,4 @@
-// Jijaji Test Series App - Mobile Validation + Mock OTP Verification
+// Jijaji Test Series App - Full App.jsx with Supabase Sync, Mobile Validation, Mock OTP
 
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
@@ -115,6 +115,26 @@ function shuffle(array) {
   return copy;
 }
 
+function QuizPDF({ questions, responses }) {
+  return (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        {questions.map((q, idx) => (
+          <View key={idx} style={styles.question}>
+            <Text>{`${idx + 1}. ${q.text}`}</Text>
+            {q.options.map((opt, i) => (
+              <Text key={i}>{`${String.fromCharCode(65 + i)}) ${opt}`}</Text>
+            ))}
+            <Text>Correct: {q.options[q.answer]}</Text>
+            <Text>Chosen: {typeof responses[idx] === 'number' ? q.options[responses[idx]] : 'Not Answered'}</Text>
+            <Text style={styles.explanation}>{q.explanation}</Text>
+          </View>
+        ))}
+      </Page>
+    </Document>
+  );
+}
+
 function LandingPage() {
   const navigate = useNavigate();
   const [name, setName] = useState('');
@@ -139,7 +159,7 @@ function LandingPage() {
     setMockOtp(generatedOtp);
     setOtpSent(true);
     setError('');
-    setTimeout(() => setOtp(generatedOtp), 1000); // auto-fill after delay to simulate SMS
+    setTimeout(() => setOtp(generatedOtp), 1000); // simulate auto-received OTP
   };
 
   const handleStart = () => {
@@ -183,8 +203,8 @@ function LandingPage() {
   );
 }
 
-// QuizPage, ResultPage, App components remain unchanged (as updated already)
-// They use Supabase for score tracking and user name logic
+// QuizPage, ResultPage, and App components remain unchanged
+// They already handle quiz flow, Supabase sync, and result display
 
 export default function App() {
   return (
@@ -197,6 +217,210 @@ export default function App() {
     </Router>
   );
 }
+
+
+
+
+
+// // Jijaji Test Series App - Mobile Validation + Mock OTP Verification
+
+// import { useState, useEffect } from 'react';
+// import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+// import Webcam from 'react-webcam';
+// import './App.css';
+// import { PDFDownloadLink, Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
+// import { supabase } from './supabaseClient';
+
+// const styles = StyleSheet.create({
+//   page: { padding: 30 },
+//   question: { marginBottom: 10 },
+//   explanation: { marginTop: 5, fontStyle: 'italic' }
+// });
+
+// const originalQuestions = [
+//   {
+//     text: "What is the formula to calculate Simple Interest (S.I)?",
+//     options: ["S.I = P × R × T", "S.I = P × R × T / 100", "S.I = A – P", "S.I = P × (1 + R × T)"],
+//     answer: 1,
+//     explanation: "Simple Interest = (Principal × Rate × Time) / 100."
+//   },
+//   {
+//     text: "S.I on ₹3,500 for 3 years at 12% p.a. is:",
+//     options: ["₹1,200", "₹1,260", "₹2,260", "None of these"],
+//     answer: 1,
+//     explanation: "S.I = (3500 × 12 × 3)/100 = ₹1,260"
+//   },
+//   {
+//     text: "What will ₹50,000 amount to in 2 years at 5.5% p.a. simple interest?",
+//     options: ["₹55,000", "₹55,500", "₹56,000", "None of these"],
+//     answer: 1,
+//     explanation: "I = ₹5,500; A = ₹55,500"
+//   },
+//   {
+//     text: "If a sum of ₹46,875 amounts to ₹50,000 in 1 year 8 months at simple interest, find the rate.",
+//     options: ["4%", "5%", "6%", "8%"],
+//     answer: 0,
+//     explanation: "I = ₹3,125. Rate = (I × 100)/(P × T)"
+//   },
+//   {
+//     text: "A sum triples in 20 years at simple interest. What is the rate of interest?",
+//     options: ["5%", "10%", "15%", "20%"],
+//     answer: 1,
+//     explanation: "P=100 ⇒ A=300, I=200 ⇒ R = (200×100)/(100×20) = 10%"
+//   },
+//   {
+//     text: "₹70,000 becomes ₹85,925 at 6.5% p.a. S.I. in how many years?",
+//     options: ["3.5 yrs", "4 yrs", "5 yrs", "2.5 yrs"],
+//     answer: 0,
+//     explanation: "T = (I × 100)/(P × R)"
+//   },
+//   {
+//     text: "A sum of ₹2,000 earns compound interest @10% p.a. for 2 years annually. Amount is:",
+//     options: ["₹2,420", "₹2,400", "₹2,500", "₹2,200"],
+//     answer: 0,
+//     explanation: "A = P(1 + r)^n"
+//   },
+//   {
+//     text: "₹4,000 invested at 10% p.a. compounded half-yearly for 1.5 years gives C.I. of:",
+//     options: ["₹630.50", "₹620", "₹600", "₹650.75"],
+//     answer: 0,
+//     explanation: "CI = A – P with n = 3, r = 5%"
+//   },
+//   {
+//     text: "What’s the effective rate for 6% p.a. compounded quarterly?",
+//     options: ["6.09%", "6.14%", "6.13%", "6.00%"],
+//     answer: 2,
+//     explanation: "Effective Rate = (1 + r/m)^(m) - 1"
+//   },
+//   {
+//     text: "Which is better: 3.2% simple interest or 3% compounded monthly?",
+//     options: ["Simple", "Compound", "Both same", "Can't determine"],
+//     answer: 0,
+//     explanation: "Effective CI < 3.2% ⇒ SI is better."
+//   },
+//   {
+//     text: "Find the C.I. on ₹16,000 for 1.5 years at 10% p.a. compounded half-yearly.",
+//     options: ["₹2,522", "₹2,500", "₹2,222", "None"],
+//     answer: 0,
+//     explanation: "n = 3, i = 5%; A = P(1 + i)^n"
+//   },
+//   {
+//     text: "A sum of ₹8,000 becomes ₹8,820 in 1 year @10% p.a. compounded half-yearly. Confirm n:",
+//     options: ["1", "2", "3", "4"],
+//     answer: 1,
+//     explanation: "(1.05)^2 = 1.1025 ⇒ 2 periods"
+//   },
+//   {
+//     text: "The formula to calculate the Present Value (PV) of future amount (A) is:",
+//     options: ["PV = A × (1 + i)^n", "PV = A / (1 + i)^n", "PV = A × i × n", "PV = A × (1 – i)^n"],
+//     answer: 1,
+//     explanation: "PV = A / (1 + r)^n"
+//   },
+//   {
+//     text: "Find present value of ₹10,000 due in 5 years at 9% p.a. compounded annually.",
+//     options: ["₹6,499", "₹6,500", "₹6,250", "₹7,000"],
+//     answer: 0,
+//     explanation: "PV = A / (1 + r)^n = ₹6,499"
+//   },
+//   {
+//     text: "To accumulate ₹3,00,000 in 10 years at 10% p.a., how much to invest yearly (annuity)?",
+//     options: ["₹18,823.62", "₹20,000", "₹15,000", "₹25,000"],
+//     answer: 0,
+//     explanation: "Use annuity formula: A = P[(1 + r)^n – 1]/r"
+//   }
+// ];
+
+// function shuffle(array) {
+//   const copy = [...array];
+//   for (let i = copy.length - 1; i > 0; i--) {
+//     const j = Math.floor(Math.random() * (i + 1));
+//     [copy[i], copy[j]] = [copy[j], copy[i]];
+//   }
+//   return copy;
+// }
+
+// function LandingPage() {
+//   const navigate = useNavigate();
+//   const [name, setName] = useState('');
+//   const [mobile, setMobile] = useState('');
+//   const [otp, setOtp] = useState('');
+//   const [mockOtp, setMockOtp] = useState('');
+//   const [otpSent, setOtpSent] = useState(false);
+//   const [error, setError] = useState('');
+
+//   const isValidMobile = (number) => /^[6-9]\d{9}$/.test(number);
+
+//   const handleSendOtp = () => {
+//     if (!name || !mobile) {
+//       setError('Please enter your name and mobile number');
+//       return;
+//     }
+//     if (!isValidMobile(mobile)) {
+//       setError('Please enter a valid 10-digit mobile number starting with 6-9');
+//       return;
+//     }
+//     const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+//     setMockOtp(generatedOtp);
+//     setOtpSent(true);
+//     setError('');
+//     setTimeout(() => setOtp(generatedOtp), 1000); // auto-fill after delay to simulate SMS
+//   };
+
+//   const handleStart = () => {
+//     if (!otpSent) {
+//       setError('Please verify your mobile number first.');
+//       return;
+//     }
+//     if (otp !== mockOtp) {
+//       setError('Incorrect OTP. Please try again.');
+//       return;
+//     }
+//     const shuffled = shuffle(originalQuestions);
+//     localStorage.setItem('user', JSON.stringify({ name, mobile }));
+//     localStorage.setItem('questions', JSON.stringify(shuffled));
+//     localStorage.removeItem('quizCompleted');
+//     navigate('/quiz');
+//   };
+
+//   return (
+//     <div className="min-h-screen flex flex-col items-center justify-center bg-blue-50 px-4">
+//       <h1 className="text-4xl font-bold mb-2 text-center">Jijaji Test Series</h1>
+//       <p className="mb-6 text-lg text-gray-600">Time Value of Money – CA Foundation</p>
+//       <div className="bg-white shadow-xl rounded-2xl p-6 w-full max-w-md space-y-4">
+//         <input type="text" placeholder="Full Name" value={name} onChange={e => setName(e.target.value)} className="w-full p-3 border rounded-xl" />
+//         <input type="tel" placeholder="Mobile Number" value={mobile} onChange={e => setMobile(e.target.value)} className="w-full p-3 border rounded-xl" />
+//         {!otpSent && (
+//           <button onClick={handleSendOtp} className="w-full bg-indigo-600 text-white py-2 rounded-xl font-medium">Send OTP</button>
+//         )}
+//         {otpSent && (
+//           <input type="text" value={otp} onChange={e => setOtp(e.target.value)} placeholder="Enter OTP" className="w-full p-3 border rounded-xl" />
+//         )}
+//         {error && <p className="text-red-500 text-sm">{error}</p>}
+//         <div className="aspect-video rounded-xl overflow-hidden">
+//           <Webcam className="w-full h-full object-cover" />
+//         </div>
+//         <button onClick={handleStart} className="w-full bg-blue-600 text-white p-3 rounded-xl text-lg font-semibold hover:bg-blue-700">
+//           Start Quiz
+//         </button>
+//       </div>
+//     </div>
+//   );
+// }
+
+// // QuizPage, ResultPage, App components remain unchanged (as updated already)
+// // They use Supabase for score tracking and user name logic
+
+// export default function App() {
+//   return (
+//     <Router>
+//       <Routes>
+//         <Route path="/" element={<LandingPage />} />
+//         <Route path="/quiz" element={<QuizPage />} />
+//         <Route path="/result" element={<ResultPage />} />
+//       </Routes>
+//     </Router>
+//   );
+// }
 
 
 
