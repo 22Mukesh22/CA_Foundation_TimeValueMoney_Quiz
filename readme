@@ -1,1 +1,28 @@
-hi
+# Jijaji Test Series - CA Foundation Quiz
+
+A professional mock test web app for the "Time Value of Money" chapter of CA Foundation.
+
+## Features
+
+- Real exam interface with webcam monitoring
+- Fully responsive for mobile, tablet, and laptop
+- Timed test with tab-switch detection
+- Score + explanation after submission
+
+## Tech Stack
+
+- React + Vite
+- Tailwind CSS
+- React Webcam
+- React Router
+
+## Getting Started
+
+```bash
+# Clone and install
+git clone https://github.com/yourusername/jijaji-quiz-app.git
+cd jijaji-quiz-app
+npm install
+
+# Start development server
+npm run dev
